@@ -1,0 +1,6 @@
+@SuggestionHub.API_HostAddress = http://localhost:5122
+
+GET {{SuggestionHub.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

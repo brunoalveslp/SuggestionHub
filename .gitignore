@@ -3,6 +3,31 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+
+# Visual Studio padrão (geralmente já existe no seu arquivo)
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.pdb
+*.mdb
+
+# Node.js e frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# arquivos do sistema
+.DS_Store
+Thumbs.db
+
+
 # User-specific files
 *.rsuser
 *.suo
