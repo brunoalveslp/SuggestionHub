@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SuggestionHub.Domain\SuggestionHub.Domain.csproj" />
-    <ProjectReference Include="..\SuggestionHub.Infrastructure\SuggestionHub.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
