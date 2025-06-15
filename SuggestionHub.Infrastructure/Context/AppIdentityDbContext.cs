@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SuggestionHub.Infrastructure.Identity.Entities;
 
-namespace SuggestionHub.Infrastructure;
+namespace SuggestionHub.Infrastructure.Context;
 
 public class AppIdentityDbContext : IdentityDbContext<ApplicationUser>
 {

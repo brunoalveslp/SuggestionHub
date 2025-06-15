@@ -56,7 +56,9 @@ public class TokenService : ITokenService
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
             Expiration = expires,
+            UserId = user.Id,
             Email = user.Email,
+            IdRevenda = user.IdRevenda,
             DisplayName = user.DisplayName,
             Roles = roles.ToList()
         };
