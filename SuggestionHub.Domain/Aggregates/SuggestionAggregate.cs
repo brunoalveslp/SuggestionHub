@@ -8,7 +8,8 @@ public class SuggestionAggregate
     public int Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public SuggestionStatus status { get; set; }
+    public SuggestionStatus Status { get; set; }
+    public Category Category { get; set; }
     public int CategoryId { get; set; }
     public string UserId { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -32,7 +33,7 @@ public class SuggestionAggregate
         CategoryId = categoryId;
         UserId = userId;
         CreatedAt = DateTime.UtcNow;
-        status = SuggestionStatus.Pending;
+        Status = SuggestionStatus.Pending;
 
     }
 
@@ -56,5 +57,73 @@ public class SuggestionAggregate
         if (like == null)
             throw new InvalidOperationException("Usuário não curtiu esta sugestão.");
         _likes.Remove(like);
+    }
+
+    public void AddComment(string userId,string userName, string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            throw new ArgumentException("O conteúdo do comentário não pode ser vazio.");
+        _comments.Add(new Comment
+        {
+            UserId = userId,
+            UserName = userName, 
+            SuggestionId = Id,
+            Content = content,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    public void UpdateComment(int commentId, string userId, string userName, string content)
+    {
+        var comment = _comments.FirstOrDefault(x => x.Id == commentId);
+
+        if (comment == null)
+            throw new InvalidOperationException("Comentário não encontrado.");
+        if (comment.UserId != userId)
+            throw new InvalidOperationException("Usuário não tem permissão para editar este comentário.");
+        if (string.IsNullOrWhiteSpace(userName))
+            throw new ArgumentException("O nome de usuário não pode ser vazio.");
+
+        if (string.IsNullOrWhiteSpace(content))
+            throw new ArgumentException("O conteúdo do comentário não pode ser vazio.");
+
+        comment.UserName = userName;
+        comment.Content = content;
+        comment.LastUpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RemoveComment(int commentId, string userId, string userRole)
+    {
+        var comment = _comments.FirstOrDefault(x => x.Id == commentId);
+
+        if (comment == null)
+            throw new InvalidOperationException("Comentário não encontrado.");
+
+        if (comment.UserId != userId || userRole != "Admin")
+            _comments.Remove(comment);
+
+        else
+            throw new InvalidOperationException("Usuário não tem permissão para remover este comentário.");
+    }
+
+    public void AddEvent(int userId, string userName, string action, string? changeDescription = null)
+    {
+        _events.Add(new SuggestionEvent
+        {
+            SuggestionId = Id,
+            UserId = userId,
+            UserName = userName,
+            ChangeDate = DateTime.UtcNow,
+            Action = action,
+            ChangeDescription = changeDescription
+        });
+    }
+
+    public void UpdateStatus(SuggestionStatus newStatus, int userId, string userName)
+    {
+        if (Status == newStatus)
+            throw new InvalidOperationException("O status já está com este status.");
+        Status = newStatus;
+        AddEvent(userId, userName, "Status Alterado!", $"Novo status: {newStatus}");
     }
 }
