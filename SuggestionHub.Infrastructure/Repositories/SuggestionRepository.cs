@@ -24,7 +24,7 @@ public class SuggestionRepository : ISuggestionRepository
             .AsNoTracking()
             .Include(s => s.Comments)
             .Include(s => s.Likes)
-             .Include(s => s.Events)
+            .Include(s => s.Events)
             .Where(s => s.CreatedAt.Month == month && s.CreatedAt.Year == year)
             .ToListAsync();
 
@@ -143,6 +143,9 @@ public class SuggestionRepository : ISuggestionRepository
     public async Task<SuggestionDTO?> GetByIdAsync(int id)
     {
         return await _context.Suggestions
+            .Include(c => c.Comments)
+            .Include(l => l.Likes)
+            .Include(e => e.Events)
             .Where(q => q.Id == id)
             .Select(q => new SuggestionDTO
             {
