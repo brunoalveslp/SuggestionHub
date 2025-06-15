@@ -10,6 +10,7 @@ import type { StatusUpdateRequest } from '@/types/suggestion/statusUpdateRequest
 import type { CreateSuggestionRequest } from '@/types/suggestion/createSuggestionRequest'
 import type { SuggestionDetailsDTO } from '@/types/suggestion/suggestionDetailsDTO'
 import type { DashboardSummary } from '@/types/suggestion/dashboardSummaryDTO'
+import type { SuggestionEventRequest } from '@/types/suggestion/suggestionEventRequest'
 
 function getAuthHeaders() {
   const authStore = useAuthStore()
@@ -38,6 +39,7 @@ export async function fetchSuggestionById(id: number) {
   const res = await axios.get<SuggestionDetailsDTO>(`/suggestion/${id}`, {
     headers: getAuthHeaders(),
   })
+  console.log(res.data)
   return res.data
 }
 
@@ -91,11 +93,11 @@ export async function removeComment(
   })
 }
 
-export async function updateSuggestionStatus(
+export async function addSuggestionEvent(
   suggestionId: number,
-  request: StatusUpdateRequest
+  request: SuggestionEventRequest
 ) {
-  await axios.patch(`/suggestion/${suggestionId}/status`, request, {
+  await axios.post(`/suggestion/${suggestionId}/event`, request, {
     headers: getAuthHeaders(),
   })
 }

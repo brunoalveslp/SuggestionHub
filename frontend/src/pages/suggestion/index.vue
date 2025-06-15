@@ -55,63 +55,66 @@
     </v-card>
 
     <!-- Lista de sugestões -->
+    <!-- Lista de sugestões -->
     <v-card class="pa-4 mt-3" elevated="4" variant="outlined" style="max-height: 600px; overflow-y: auto;">
       <v-data-table :headers="headers" :items="suggestions" item-value="id" show-expand class="elevation-1"
         :expanded.sync="expanded" :hide-default-footer="true">
-        <!-- <template #top>
-          <v-toolbar flat color="transparent">
-            <v-toolbar-title>Sugestões</v-toolbar-title>
-          </v-toolbar>
-        </template> -->
-
-        <template #item.title="{ item }">
-          <RouterLink :to="`/suggestion/${item.id}`" class="text-primary text-decoration-none font-weight-medium"
-            @click.prevent="goToSuggestionDetail(item.id)">
-            <span class="text-grey-darken-1 font-weight-light">#{{ item.id }}</span> -
-            <span class="hover:underline">{{ item.title }}</span>
-          </RouterLink>
-        </template>
-
-        <template #item.status="{ item }">
-          <v-chip :color="getStatusColor(item.status)" text-color="white" small>
-            {{ getStatusLabel(item.status) }}
-          </v-chip>
-        </template>
-
-        <template #item.categoryId="{ item }">
-          {{ getCategoryName(item.categoryId) }}
-        </template>
-
-        <template #item.createdAt="{ item }">
-          {{ formatDate(item.createdAt) }}
-        </template>
-
-        <!-- Botão expandir linha com chevron -->
+        <!-- Botão expandir na primeira coluna -->
         <template #data-table-expand="{ item, expand, isExpanded }">
-          <v-btn icon @click="expand(item)">
-            <v-icon>
-              {{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-            </v-icon>
-          </v-btn>
+          <td @mouseenter="preloadDetail(item.id)">
+            <v-btn icon @click="expand(item)">
+              <v-icon>
+                {{ isExpanded(item) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
+            </v-btn>
+          </td>
         </template>
 
-        <!-- Expansão com detalhes -->
+        <!-- Título com preload ao mouseenter -->
+        <template #item.title="{ item }">
+          <td @mouseenter="preloadDetail(item.id)">
+            <RouterLink :to="`/suggestion/${item.id}`" class="text-primary text-decoration-none font-weight-medium"
+              @click.prevent="goToSuggestionDetail(item.id)">
+              <span class="text-grey-darken-1 font-weight-light">#{{ item.id }}</span> -
+              <span class="hover:underline">{{ item.title }}</span>
+            </RouterLink>
+          </td>
+        </template>
+
+        <!-- Status com preload -->
+        <template #item.status="{ item }">
+          <td @mouseenter="preloadDetail(item.id)">
+            <v-chip :color="getStatusColor(item.status)" text-color="white" small>
+              {{ getStatusLabel(item.status) }}
+            </v-chip>
+          </td>
+        </template>
+
+        <!-- Categoria com preload -->
+        <template #item.categoryId="{ item }">
+          <td @mouseenter="preloadDetail(item.id)">
+            {{ getCategoryName(item.categoryId) }}
+          </td>
+        </template>
+
+        <!-- Data com preload -->
+        <template #item.createdAt="{ item }">
+          <td @mouseenter="preloadDetail(item.id)">
+            {{ formatDate(item.createdAt) }}
+          </td>
+        </template>
+
+        <!-- Linha expandida -->
         <template #expanded-row="{ item }">
           <tr>
             <td :colspan="headers.length">
-
               <v-card class="mt-4 pa-4" flat width="100%">
-                <!-- Descrição -->
                 <div>
                   <v-card-subtitle class="ml-0 pl-0">Descrição</v-card-subtitle>
                   <div class="description-clamp text-body-1 pa-1" v-html="sanitizeDescription(item.description)"></div>
                 </div>
 
-                <!-- Ações -->
                 <v-card-actions class="d-flex justify-space-between px-0 mt-2" width="100%">
-
-
-
                   <div class="d-flex align-center">
                     <v-icon small class="mr-1">mdi-comment</v-icon>
                     <span class="mr-4">{{ item.commentCount }}</span>
@@ -132,8 +135,6 @@
                       </template>
                     </v-btn>
                   </v-hover>
-
-
                 </v-card-actions>
               </v-card>
             </td>
@@ -141,7 +142,6 @@
         </template>
       </v-data-table>
 
-      <!-- Trigger para scroll infinito -->
       <div ref="loadMoreTrigger" style="height: 1px;"></div>
     </v-card>
 
@@ -263,10 +263,6 @@ async function loadSuggestions(reset = false) {
   try {
     const res = await fetchSuggestions(filter, currentUserId)
 
-    res.items.forEach(item =>
-      localStorage.setItem(`suggestion_${item.id}`, JSON.stringify(item))
-    )
-
     suggestions.value.push(...res.items)
     offset.value += res.items.length
     finished.value = offset.value >= res.totalCount || res.items.length === 0
@@ -354,11 +350,13 @@ function goToSuggestionDetail(id: number) {
   }, 100)
 }
 
-async function preloadDetail(suggestion: SuggestionDTO) {
+async function preloadDetail(id: number) {
   try {
-    const result = await fetchSuggestionById(suggestion.id)
+    console.log('suggestion ID')
+    const result = await fetchSuggestionById(id)
+    // Salva no localStorage com chave única para evitar conflito
     localStorage.setItem(`suggestion_${result.id}`, JSON.stringify(result))
-    console.log('Pré-carregado sugestão #', result.id)
+    console.log('Pré-carregado e salvo no localStorage sugestão #', result.id)
   } catch (e) {
     console.error('Erro no preload:', e)
   }

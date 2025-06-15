@@ -2,7 +2,7 @@
 <template>
   <v-navigation-drawer v-model="isDrawerOpen" class="pt-8 mt-10">
     <v-list>
-      <v-list-item link :to="'/'" prepend-icon="mdi-monitor-dashboard">Dashboard</v-list-item>
+      <v-list-item v-if="isAdmin" link :to="'/'" prepend-icon="mdi-monitor-dashboard">Dashboard</v-list-item>
       <v-list-item link :to="'/suggestion'" prepend-icon="mdi-head-lightbulb-outline">Sugestões</v-list-item>
 
       <!-- Visível apenas para Admin -->

@@ -12,7 +12,7 @@
           Alterar Status / Gerar Evento
         </v-btn>
 
-        <v-chip :color="statusColor" class="text-white">
+        <v-chip :color="statusColor" class="text-white ml-4">
           {{ statusLabel }}
         </v-chip>
       </div>
@@ -21,20 +21,13 @@
     <!-- Render com imagens embutidas -->
     <div class="text-body-1" v-html="descriptionWithImages"></div>
 
-    <StatusUpdateDialog
-      v-if="dialog"
-      v-model="dialog"
-      :suggestionId="suggestion.id"
-      @updated="$emit('status-updated')"
-    />
+    <SuggestionEventDialog v-if="dialog" :model-value="dialog" @update:modelValue="dialog = $event"
+      :suggestionId="suggestion.id" :currentStatus="suggestion.status" @updated="$emit('status-updated')" />
 
     <div class="d-flex align-center justify-center mb-3">
       <v-spacer></v-spacer>
-      <v-btn
-        :color="suggestion.hasUserLiked ? 'primary' : 'secondary'"
-        @click="dialogVisible = true"
-        :variant="suggestion.hasUserLiked ? 'elevated' : 'outlined'"
-      >
+      <v-btn :color="suggestion.hasUserLiked ? 'primary' : 'secondary'" @click="dialogVisible = true"
+        :variant="suggestion.hasUserLiked ? 'elevated' : 'outlined'">
         {{ suggestion.hasUserLiked ? 'Subscrito' : 'Subscrever' }}
       </v-btn>
       <v-icon small class="ml-1">mdi-thumb-up</v-icon>
@@ -45,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import StatusUpdateDialog from './StatusUpdateDialog.vue'
+import SuggestionEventDialog from './SuggestionEventDialog.vue'
 import { likeSuggestion, removeLikeSuggestion } from '@/services/suggestion'
 import type { SuggestionDetailsDTO } from '@/types/suggestion/suggestionDetailsDTO'
 

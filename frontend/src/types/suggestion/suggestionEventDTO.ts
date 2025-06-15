@@ -1,7 +1,7 @@
 export interface SuggestionEventDTO {
   id: number
   suggestionId: number
-  userId: number
+  userId: string
   userName: string
   action: string
   changeDescription?: string | null

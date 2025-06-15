@@ -24,6 +24,7 @@ declare module 'vue' {
     SuggestionCard: typeof import('./components/suggestion/SuggestionCard.vue')['default']
     SuggestionCommentsCard: typeof import('./components/suggestion/SuggestionCommentsCard.vue')['default']
     SuggestionDetailsCard: typeof import('./components/suggestion/SuggestionDetailsCard.vue')['default']
+    SuggestionEventDialog: typeof import('./components/suggestion/SuggestionEventDialog.vue')['default']
     SuggestionEventsCard: typeof import('./components/suggestion/SuggestionEventsCard.vue')['default']
     SuggestionsList: typeof import('./components/suggestion/SuggestionsList.vue')['default']
     UserAvatar: typeof import('./components/UserAvatar.vue')['default']

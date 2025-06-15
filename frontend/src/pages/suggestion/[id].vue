@@ -26,7 +26,7 @@
       </v-col>
 
       <v-col cols="12" md="4">
-        <template v-if="suggestion">
+        <template v-if="suggestion && isAdmin">
           <SuggestionEventsCard :events="suggestion.events || []" />
         </template>
         <template v-else>
@@ -54,8 +54,6 @@ const suggestion = ref<SuggestionDetailsDTO | null>(null)
 const isAdmin = authStore.roles.includes('Admin')
 
 const userId = computed(() => authStore.userId ?? '')
-
-
 
 
 async function loadSuggestion(forceRefresh = false) {
