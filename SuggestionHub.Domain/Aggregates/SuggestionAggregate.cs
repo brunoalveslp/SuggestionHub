@@ -106,7 +106,7 @@ public class SuggestionAggregate
             throw new InvalidOperationException("Usuário não tem permissão para remover este comentário.");
     }
 
-    public void AddEvent(int userId, string userName, string? action = null, string? changeDescription = null, SuggestionStatus? newStatus = null)
+    public void AddEvent(string userId, string userName, string? action = null, string? changeDescription = null, SuggestionStatus? newStatus = null)
     {
         bool statusChanged = false;
 
