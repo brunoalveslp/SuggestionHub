@@ -106,8 +106,24 @@ public class SuggestionAggregate
             throw new InvalidOperationException("Usuário não tem permissão para remover este comentário.");
     }
 
-    public void AddEvent(int userId, string userName, string action, string? changeDescription = null)
+    public void AddEvent(int userId, string userName, string? action = null, string? changeDescription = null, SuggestionStatus? newStatus = null)
     {
+        bool statusChanged = false;
+
+        if (newStatus.HasValue && Status != newStatus.Value)
+        {
+            Status = newStatus.Value;
+            statusChanged = true;
+
+            // Define valores padrão se não foram fornecidos
+            action ??= "Status Alterado";
+            changeDescription ??= $"Novo status: {newStatus}";
+        }
+
+        // Valida que há ao menos algo a ser registrado
+        if (!statusChanged && string.IsNullOrWhiteSpace(action) && string.IsNullOrWhiteSpace(changeDescription))
+            throw new ArgumentException("Deve ser informada uma ação, descrição ou alteração de status para registrar um evento.");
+
         _events.Add(new SuggestionEvent
         {
             SuggestionId = Id,
@@ -119,11 +135,4 @@ public class SuggestionAggregate
         });
     }
 
-    public void UpdateStatus(SuggestionStatus newStatus, int userId, string userName)
-    {
-        if (Status == newStatus)
-            throw new InvalidOperationException("O status já está com este status.");
-        Status = newStatus;
-        AddEvent(userId, userName, "Status Alterado!", $"Novo status: {newStatus}");
-    }
 }
