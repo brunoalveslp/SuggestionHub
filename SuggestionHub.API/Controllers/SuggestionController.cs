@@ -111,10 +111,19 @@ public class SuggestionController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("{suggestionId:int}/status")]
-    public async Task<IActionResult> UpdateStatus(int suggestionId, [FromBody] StatusUpdateRequest request)
+    [HttpPost("{suggestionId}/event")]
+    public async Task<IActionResult> AddEvent(int suggestionId, [FromBody] SuggestionEventRequest request)
     {
-        await _suggestionService.UpdateStatusAsync(suggestionId, request.NewStatus, request.UserId, request.UserName);
+        await _suggestionService.AddEventAsync(
+            suggestionId,
+            request.UserId,
+            request.UserName,
+            request.Action,
+            request.ChangeDescription,
+            request.NewStatus
+        );
+
         return NoContent();
     }
+
 }
