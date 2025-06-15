@@ -131,16 +131,24 @@ public class SuggestionService : ISuggestionService
         await _repository.SaveChangesAsync();
     }
 
-    public async Task UpdateStatusAsync(int suggestionId, string newStatus, int userId, string userName)
+    public async Task AddEventAsync(int suggestionId, int userId, string userName, string? action = null, string? description = null, string? newStatus = null)
     {
         var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
             ?? throw new Exception("Sugestão não encontrada.");
 
-        if (!Enum.TryParse<SuggestionStatus>(newStatus, out var status))
-            throw new ArgumentException("Status inválido");
+        SuggestionStatus? statusToUpdate = null;
 
-        suggestion.UpdateStatus(status, userId, userName);
+        if (!string.IsNullOrWhiteSpace(newStatus))
+        {
+            if (!Enum.TryParse<SuggestionStatus>(newStatus, out var parsedStatus))
+                throw new ArgumentException("Status inválido.");
+
+            statusToUpdate = parsedStatus;
+        }
+
+        suggestion.AddEvent(userId, userName, action, description, statusToUpdate);
         _repository.Update(suggestion);
         await _repository.SaveChangesAsync();
     }
+
 }

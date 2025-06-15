@@ -15,5 +15,7 @@ public interface ISuggestionRepository
     Task AddAsync(SuggestionAggregate suggestion);
     void Update(SuggestionAggregate suggestion);
     void Delete(SuggestionAggregate suggestion);
+    
+
     Task SaveChangesAsync();
 }
