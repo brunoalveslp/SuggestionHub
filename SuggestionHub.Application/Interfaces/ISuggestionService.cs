@@ -17,6 +17,6 @@ public interface ISuggestionService
     Task AddCommentAsync(int suggestionId, string userId, string userName, string content);
     Task UpdateCommentAsync(int suggestionId, int commentId, string userId, string userName, string content);
     Task RemoveCommentAsync(int suggestionId, int commentId, string userId, string userRole);
-    Task AddEventAsync(int suggestionId, int userId, string userName, string? action = null, string? description = null, string? newStatus = null);
+    Task AddEventAsync(int suggestionId, string userId, string userName, string? action = null, string? description = null, string? newStatus = null);
 
 }

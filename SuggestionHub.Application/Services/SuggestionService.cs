@@ -131,7 +131,7 @@ public class SuggestionService : ISuggestionService
         await _repository.SaveChangesAsync();
     }
 
-    public async Task AddEventAsync(int suggestionId, int userId, string userName, string? action = null, string? description = null, string? newStatus = null)
+    public async Task AddEventAsync(int suggestionId, string userId, string userName, string? action = null, string? description = null, string? newStatus = null)
     {
         var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
             ?? throw new Exception("Sugestão não encontrada.");
