@@ -24,6 +24,12 @@ public class TokenService : ITokenService
 
     public async Task<AuthResultDTO> GenerateTokenAsync(ApplicationUser user)
     {
+
+        if (user == null)
+        {
+            throw new ArgumentNullException(nameof(user), "O usuario não pode ser nulo!");
+        }
+
         var roles = await _userManager.GetRolesAsync(user);
 
         var claims = new List<Claim>

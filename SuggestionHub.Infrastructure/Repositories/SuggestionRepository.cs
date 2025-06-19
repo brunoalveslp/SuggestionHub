@@ -23,7 +23,7 @@ public class SuggestionRepository : ISuggestionRepository
         var result = await _context.Suggestions
             .AsNoTracking()
             .Include(s => s.Comments)
-            .Include(s => s.Likes)
+            .Include(s => s.Subscriptions)
             .Include(s => s.Events)
             .Where(s => s.CreatedAt.Month == month && s.CreatedAt.Year == year)
             .ToListAsync();
@@ -32,13 +32,14 @@ public class SuggestionRepository : ISuggestionRepository
         {
             Id = s.Id,
             Title = s.Title,
+            Subject = s.Subject,
             Description = s.Description,
             Status = s.Status,
             CategoryId = s.CategoryId,
             CreatedAt = s.CreatedAt,
             CommentCount = s.Comments?.Count ?? 0,
-            LikeCount = s.Likes?.Count ?? 0,
-            HasUserLiked = false // este valor é específico para o usuário logado e pode ser ajustado depois
+            SubscriptionCount = s.Subscriptions?.Count ?? 0,
+            HasUserSubscribed = false // este valor é específico para o usuário logado e pode ser ajustado depois
         }).ToList();
 
         return summaries;
@@ -47,7 +48,7 @@ public class SuggestionRepository : ISuggestionRepository
     public async Task<IEnumerable<SuggestionAggregate>> GetAllAsync()
         => await _context.Suggestions
                          .Include(s => s.Comments)
-                         .Include(s => s.Likes)
+                         .Include(s => s.Subscriptions)
                          .Include(s => s.Events)
                          .ToListAsync();
 
@@ -55,7 +56,7 @@ public class SuggestionRepository : ISuggestionRepository
     {
         var query = _context.Suggestions
             .Include(c => c.Comments)
-            .Include(l => l.Likes)
+            .Include(l => l.Subscriptions)
             .Include(e => e.Events)
             .AsQueryable();
 
@@ -86,13 +87,14 @@ public class SuggestionRepository : ISuggestionRepository
         {
             s.Id,
             s.Title,
+            s.Subject,
             s.Description,
             s.Status,
             s.CategoryId,
             s.CreatedAt,
             CommentCount = s.Comments.Count(),
-            LikeCount = s.Likes.Count(l => l.UserId != null && l.UserId != ""),
-            HasUserLiked = s.Likes.Any(l => l.UserId == currentUserId)
+            SubscriptionCount = s.Subscriptions.Count(l => l.UserId != null && l.UserId != ""),
+            HasUserSubscribed = s.Subscriptions.Any(l => l.UserId == currentUserId)
         });
 
         // Aplicar ordenação dinâmica
@@ -104,9 +106,9 @@ public class SuggestionRepository : ISuggestionRepository
                     ? projected.OrderByDescending(s => s.Title)
                     : projected.OrderBy(s => s.Title),
 
-                "LikeCount" => filter.Descending
-                    ? projected.OrderByDescending(s => s.LikeCount)
-                    : projected.OrderBy(s => s.LikeCount),
+                "SubscriptionCount" => filter.Descending
+                    ? projected.OrderByDescending(s => s.SubscriptionCount)
+                    : projected.OrderBy(s => s.SubscriptionCount),
 
                 "CreatedAt" or _ => filter.Descending
                     ? projected.OrderByDescending(s => s.CreatedAt)
@@ -120,6 +122,7 @@ public class SuggestionRepository : ISuggestionRepository
             {
                 Id = s.Id,
                 Title = s.Title,
+                Subject = s.Subject,
                 Description = s.Description.Length > 200
                     ? s.Description.Substring(0, 200) + "..."
                     : s.Description,
@@ -127,8 +130,8 @@ public class SuggestionRepository : ISuggestionRepository
                 CategoryId = s.CategoryId,
                 CreatedAt = s.CreatedAt,
                 CommentCount = s.CommentCount,
-                LikeCount = s.LikeCount,
-                HasUserLiked = s.HasUserLiked
+                SubscriptionCount = s.SubscriptionCount,
+                HasUserSubscribed = s.HasUserSubscribed
             })
             .ToListAsync();
 
@@ -144,13 +147,14 @@ public class SuggestionRepository : ISuggestionRepository
     {
         return await _context.Suggestions
             .Include(c => c.Comments)
-            .Include(l => l.Likes)
+            .Include(l => l.Subscriptions)
             .Include(e => e.Events)
             .Where(q => q.Id == id)
             .Select(q => new SuggestionDTO
             {
                 Id = q.Id,
                 Title = q.Title,
+                Subject = q.Subject,
                 Description = q.Description,
                 Status = q.Status,
                 CategoryId = q.CategoryId,
@@ -167,8 +171,8 @@ public class SuggestionRepository : ISuggestionRepository
                     ChangeDescription = e.ChangeDescription,
                     ChangeDate = e.ChangeDate
                 }).ToList(),
-                LikeCount = q.Likes.Count,
-                HasUserLiked = q.Likes.Any(l => l.UserId == q.UserId),
+                SubscriptionCount = q.Subscriptions.Count,
+                HasUserSubscribed = q.Subscriptions.Any(l => l.UserId == q.UserId),
                 Comments = q.Comments.Select(c => new CommentDTO
                 {
                     Id = c.Id,
@@ -184,7 +188,7 @@ public class SuggestionRepository : ISuggestionRepository
     public async Task<SuggestionAggregate?> GetAggregateByIdAsync(int id)
     {
         return await _context.Suggestions
-            .Include(s => s.Likes)
+            .Include(s => s.Subscriptions)
             .Include(s => s.Comments)
             .Include(s => s.Events)
             .FirstOrDefaultAsync(s => s.Id == id);
