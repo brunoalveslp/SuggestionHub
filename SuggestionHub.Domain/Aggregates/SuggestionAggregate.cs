@@ -7,6 +7,7 @@ public class SuggestionAggregate
 {
     public int Id { get; set; }
     public string Title { get; set; }
+    public string Subject { get; set; }
     public string Description { get; set; }
     public SuggestionStatus Status { get; set; }
     public Category Category { get; set; }
@@ -15,21 +16,22 @@ public class SuggestionAggregate
     public DateTime CreatedAt { get; set; }
     public DateTime? LastUpdatedAt { get; set; }
     private readonly List<SuggestionEvent> _events = new();
-    private readonly List<Like> _likes = new();
+    private readonly List<Subscription> _subscriptions = new();
     private readonly List<Comment> _comments = new();
 
     public IReadOnlyCollection<SuggestionEvent> Events => _events.AsReadOnly();
-    public IReadOnlyCollection<Like> Likes => _likes.AsReadOnly();
+    public IReadOnlyCollection<Subscription> Subscriptions => _subscriptions.AsReadOnly();
     public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
 
 
-    public SuggestionAggregate(string title, string description, int categoryId, string userId)
+    public SuggestionAggregate(string title, string subject, string description, int categoryId, string userId)
     {
         if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("É obrigatório um titulo para a sugestão.");
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("É obrigatório uma descrição para a sugesstão");
 
-        Title = title;
-        Description = description;
+        Title = title ?? string.Empty;
+        Subject = subject ?? string.Empty; 
+        Description = description ?? string.Empty;
         CategoryId = categoryId;
         UserId = userId;
         CreatedAt = DateTime.UtcNow;
@@ -37,26 +39,60 @@ public class SuggestionAggregate
 
     }
 
-    public void AddLike(string userId)
+    public void UpdateTitle(string title)
     {
-        if (_likes.Any(x => x.UserId == userId))
+        if (!string.Equals(Title, title))
+        {
+            Title = title;
+            LastUpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public void UpdateSubject(string subject)
+    {
+        if (!string.Equals(Subject, subject))
+        {
+            Subject = subject;
+            LastUpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public void UpdateDescription(string description)
+    {
+        if (!string.Equals(Description, description))
+        {
+            Description = description;
+            LastUpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public void UpdateCategory(int categoryId)
+    {
+        if (CategoryId != categoryId)
+        {
+            CategoryId = categoryId;
+            LastUpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public void AddSubscription(string userId)
+    {
+        if (_subscriptions.Any(x => x.UserId == userId))
             throw new InvalidOperationException("Usuário já curtiu esta sugestão.");
 
-        _likes.Add(new Like
+        _subscriptions.Add(new Subscription
         {
             UserId = userId,
             SuggestionId = Id
         });
 
     }
-
-
-    public void RemoveLike(string userId)
+    public void RemoveSubscription(string userId)
     {
-        var like = _likes.FirstOrDefault(x => x.UserId == userId);
+        var like = _subscriptions.FirstOrDefault(x => x.UserId == userId);
         if (like == null)
             throw new InvalidOperationException("Usuário não curtiu esta sugestão.");
-        _likes.Remove(like);
+        _subscriptions.Remove(like);
     }
 
     public void AddComment(string userId,string userName, string content)
@@ -106,7 +142,7 @@ public class SuggestionAggregate
             throw new InvalidOperationException("Usuário não tem permissão para remover este comentário.");
     }
 
-    public void AddEvent(string userId, string userName, string? action = null, string? changeDescription = null, SuggestionStatus? newStatus = null)
+    public void AddEvent(string userId, string userName, bool isPublic, string? action = null, string? changeDescription = null, SuggestionStatus? newStatus = null)
     {
         bool statusChanged = false;
 
@@ -129,6 +165,7 @@ public class SuggestionAggregate
             SuggestionId = Id,
             UserId = userId,
             UserName = userName,
+            IsPublic = isPublic,
             ChangeDate = DateTime.UtcNow,
             Action = action,
             ChangeDescription = changeDescription

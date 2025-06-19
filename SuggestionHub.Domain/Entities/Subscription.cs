@@ -2,7 +2,7 @@
 
 namespace SuggestionHub.Domain.Entities;
 
-public class Like
+public class Subscription
 {
     public int Id { get; set; }
     public string UserId { get; set; }
