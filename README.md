@@ -22,7 +22,7 @@ UpgradeHub/
 ## 🚀 Tecnologias
 
 * **Backend:** .NET 8, ASP.NET Core Web API, Entity Framework Core, xUnit
-* **Frontend:** Vue 3, Vite, Pinia, Vue Router, Axios
+* **Frontend:** Vue 3, Material UI (Vuetify, Vite, Pinia, Vue Router (Unplugin), Axios
 * **Controle de versão:** Git, GitHub
 * **Deploy (futuro):** Azure App Service, Azure SQL / PostgreSQL
 
@@ -31,8 +31,10 @@ UpgradeHub/
 ## ⚙️ Pré-requisitos
 
 * [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+* [Entity Framework](https://learn.microsoft.com/en-us/ef/core/cli/dotnet)
 * [Node.js LTS](https://nodejs.org/)
 * [Git](https://git-scm.com/)
+* [SQL Server Express](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads) ** Possivelmente irá ser alterado para Postgres futuramente
 
 ---
 
@@ -71,9 +73,10 @@ UpgradeHub/
 
 * Abra a solução `UpgradeHub.sln` no Visual Studio 2022+.
 
-### 2. Restaurar e compilar
+### 2. Restaurar, compilar e Gerar o banco de dados
 
 * No Visual Studio: **Build Solution** (Ctrl+Shift+B)
+* No Visual Studio: > Ferramentas > Linha de Comando > Powershell do desenvolvedor rodar o script: dotnet ef migrations add InitialCreate --project "SuggestionHub.Infrastructure" --startup-project "SuggestionHub.API" --context AppDbContext
 
 ### 3. Executar a API
 
@@ -84,6 +87,8 @@ UpgradeHub/
 
 * Abra **Test Explorer** no Visual Studio e clique em **Run All**.
 
+-- Ainda não implementado
+
 ---
 
 ## 🖥️ Frontend
@@ -92,7 +97,7 @@ UpgradeHub/
 
 ```bash
 cd frontend
-npm install
+yarn install
 ```
 
 ### 2. Estrutura de Pastas
@@ -103,11 +108,10 @@ frontend/
 ├── src/
 │   ├── assets/           # imagens, fontes, css
 │   ├── components/       # componentes Vue reutilizáveis
-│   ├── views/            # páginas principais
+│   ├── pages/            # páginas principais
 │   ├── router/           # configuração das rotas
 │   ├── store/            # Pinia para estado global
 │   ├── services/         # serviços para comunicação com API (axios)
-│   ├── composables/      # composables (hooks) Vue 3
 │   └── App.vue           # componente raiz
 ├── .env.example          # exemplo de variáveis de ambiente
 └── vite.config.js        # config do Vite (proxy para API)
@@ -116,74 +120,18 @@ frontend/
 ### 3. Executar em modo de desenvolvimento
 
 ```bash
-npm run dev
+yarn dev
 ```
 
-* Acesse `http://localhost:5173`
-
-### 4. Pinia (Gerenciamento de Estado)
-
-1. Instale Pinia:
-
-   ```bash
-   npm install pinia
-   ```
-2. Configure no `main.js`:
-
-   ```js
-   import { createApp } from 'vue';
-   import { createPinia } from 'pinia';
-   import App from './App.vue';
-   import router from './router';
-
-   const app = createApp(App);
-   app.use(createPinia());
-   app.use(router);
-   app.mount('#app');
-   ```
-3. Exemplo de store em `src/store/useSuggestionStore.js`:
-
-   ```js
-   import { defineStore } from 'pinia';
-   import api from '@/services/api';
-
-   export const useSuggestionStore = defineStore('suggestions', {
-     state: () => ({ items: [] }),
-     actions: {
-       async fetchAll() {
-         this.items = await api.get('/api/suggestions').then(r => r.data);
-       }
-     }
-   });
-   ```
+* Acesse `http://localhost:3000`
 
 ### 5. Build para produção
 
 ```bash
-npm run build
+yarn build
 ```
 
 * Os arquivos ficam em `frontend/dist`.
-
----
-
-## 🔄 Fluxo de Desenvolvimento
-
-1. Crie uma branch:
-
-   ```bash
-   ```
-
-git checkout -b feature/minha-feature
-
-````
-2. Desenvolva no backend ou frontend.
-3. Commit com mensagem:
-   ```bash
-git commit -m "feat: descrição da feature"
-````
-
-4. Push e abra PR.
 
 ---
 
