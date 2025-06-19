@@ -8,6 +8,7 @@ using SuggestionHub.Application.DTOs.Dashboard;
 using SuggestionHub.Application.DTOs.Filter;
 using SuggestionHub.Application.DTOs.Result;
 using SuggestionHub.Application.Interfaces;
+using SuggestionHub.Domain.Enums;
 using SuggestionHub.Infrastructure.Interfaces;
 
 namespace SuggestionHub.API.Controllers;
@@ -61,23 +62,63 @@ public class SuggestionController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateSuggestionRequest request)
     {
-        await _suggestionService.CreateSuggestionAsync(request.Title, request.Description, request.CategoryId, request.UserId);
-        return CreatedAtAction(nameof(GetById), new { id = 0 }, null); // Atualize com ID se possível
+        var suggestionId = await _suggestionService.CreateSuggestionAsync(request.Title,request.Subject, request.Description, request.CategoryId, request.UserId);
+        var user = await _userService.GetByIdAsync(request.UserId);
+
+        if(suggestionId == 0)
+        {
+            return BadRequest("Erro ao criar sugestão, por favor tente novamente!");
+        }
+
+        await _suggestionService.AddEventAsync(
+            suggestionId, // ID da sugestão será atualizado após a criação
+            user.Id,
+            user.UserName,
+            true,
+            "Sugestão Criada",
+            "Informamos que devido ao planejamento para os próximos meses já ter sido definido e está atualmente em andamento a análise e o retorno sobre esta sugestão podem levar mais tempo do que o habitual e desejado. Agradecemos pela sua contribuição e compreensão!",
+            SuggestionStatus.Pending.ToString() // Novo status pode ser definido se necessário
+        );
+
+
+        return CreatedAtAction(nameof(GetById), new { id = suggestionId }, null);
     }
 
-    [Authorize]
-    [HttpPost("{suggestionId:int}/like")]
-    public async Task<IActionResult> Like(int suggestionId, [FromQuery] string userId)
+    [HttpPut("{suggestionId:int}")]
+    public async Task<IActionResult> Update(int suggestionId, [FromBody] CreateSuggestionRequest request)
     {
-        await _suggestionService.LikeSuggestionAsync(suggestionId, userId);
+        var user = await _userService.GetByIdAsync(request.UserId);
+        if (user is null) return BadRequest("Usuario não encontrado, por favor tente novamente!");
+
+        var result = await _suggestionService.UpdateSuggestionAsync(suggestionId,request.Title, request.Subject, request.Description, request.CategoryId);
+        await _suggestionService.AddEventAsync(
+            suggestionId,
+            user.Id,
+            user.UserName,
+            true,
+            "Sugestão Atualizada",
+            "A sugestão foi atualizada com sucesso."
+        );
+
+        if (!result)
+        {
+            return BadRequest("Erro ao atualizar sugestão, por favor tente novamente!");
+        }
+
         return NoContent();
     }
-    [Authorize]
-    [HttpDelete("{suggestionId:int}/like")]
-    public async Task<IActionResult> RemoveLike(int suggestionId, [FromQuery] string userId)
+
+    [HttpPost("{suggestionId:int}/subscription")]
+    public async Task<IActionResult> Subscribe(int suggestionId, [FromQuery] string userId)
     {
-        Console.WriteLine($"Removing like for suggestion {suggestionId} by user {userId}");
-        await _suggestionService.RemoveLikeAsync(suggestionId, userId);
+        await _suggestionService.SubscribeSuggestionAsync(suggestionId, userId);
+        return NoContent();
+    }
+    
+    [HttpDelete("{suggestionId:int}/subscription")]
+    public async Task<IActionResult> RemoveSubscription(int suggestionId, [FromQuery] string userId)
+    {
+        await _suggestionService.RemoveSubscriptionAsync(suggestionId, userId);
         return NoContent();
     }
 
@@ -118,6 +159,7 @@ public class SuggestionController : ControllerBase
             suggestionId,
             request.UserId,
             request.UserName,
+            request.IsPublic,
             request.Action,
             request.ChangeDescription,
             request.NewStatus
