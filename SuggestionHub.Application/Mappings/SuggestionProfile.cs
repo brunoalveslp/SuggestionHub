@@ -22,8 +22,8 @@ public class SuggestionProfile : Profile
         CreateMap<SuggestionEventDTO, SuggestionEvent>();
 
         // Like ↔ LikeDto
-        CreateMap<Like, LikeDTO>();
-        CreateMap<LikeDTO, Like>();
+        CreateMap<Subscription, SubscriptionDTO>();
+        CreateMap<SubscriptionDTO, Subscription>();
 
         // Comment ↔ CommentDto
         CreateMap<Comment, CommentDTO>();

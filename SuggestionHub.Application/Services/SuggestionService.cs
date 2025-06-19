@@ -25,17 +25,17 @@ public class SuggestionService : ISuggestionService
         var suggestions = await _repository.GetSuggestionsByMonthAsync(month, year);
 
         var total = suggestions.Count;
-        var likes = suggestions.Sum(s => s.LikeCount);
+        var subscriptions = suggestions.Sum(s => s.SubscriptionCount);
         var pending = suggestions.Count(s => s.Status == SuggestionStatus.Pending);
 
-        var topLiked = suggestions
-            .OrderByDescending(s => s.LikeCount)
+        var topSubscribed = suggestions
+            .OrderByDescending(s => s.SubscriptionCount)
             .Take(10)
-            .Select(s => new TopLikedSuggestionDTO
+            .Select(s => new TopSubscribedSuggestionDTO
             {
                 Id = s.Id,
                 Title = s.Title,
-                LikeCount = s.LikeCount
+                SubscriptionCount = s.SubscriptionCount
             })
             .ToList();
 
@@ -51,9 +51,9 @@ public class SuggestionService : ISuggestionService
         return new DashboardSummaryDTO
         {
             TotalSuggestions = total,
-            TotalLikes = likes,
+            TotalSubscriptions = subscriptions,
             PendingCount = pending,
-            TopLiked = topLiked,
+            TopSubscribed = topSubscribed,
             SuggestionsByDay = groupedByDay
         };
     }
@@ -76,27 +76,68 @@ public class SuggestionService : ISuggestionService
                ?? throw new Exception("Sugestão não encontrada.");
     }
 
-    public async Task CreateSuggestionAsync(string title, string description, int categoryId, string userId)
+    public async Task<int> CreateSuggestionAsync(string title, string subject, string description, int categoryId, string userId)
     {
-        var suggestion = new SuggestionAggregate(title, description, categoryId, userId);
+        var suggestion = new SuggestionAggregate(title, subject, description, categoryId, userId);
         await _repository.AddAsync(suggestion);
         await _repository.SaveChangesAsync();
+
+        return suggestion.Id;
     }
 
-    public async Task LikeSuggestionAsync(int suggestionId, string userId)
+    public async Task<bool> UpdateSuggestionAsync(int suggestionId, string title, string subject, string description, int categoryId)
     {
         var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
             ?? throw new Exception("Sugestão não encontrada.");
-        suggestion.AddLike(userId);
+
+        bool hasChanges = false;
+
+        if (!string.Equals(suggestion.Title, title, StringComparison.Ordinal) || suggestion.Title is null)
+        {
+            suggestion.UpdateTitle(title);
+            hasChanges = true;
+        }
+
+        if (!string.Equals(suggestion.Subject, subject, StringComparison.Ordinal) || suggestion.Subject is null)
+        {
+            suggestion.UpdateSubject(subject);
+            hasChanges = true;
+        }
+
+        if (!string.Equals(suggestion.Description, description, StringComparison.Ordinal) || suggestion.Description is null)
+        {
+            suggestion.UpdateDescription(description);
+            hasChanges = true;
+        }
+
+        if (suggestion.CategoryId != categoryId)
+        {
+            suggestion.UpdateCategory(categoryId);
+            hasChanges = true;
+        }
+
+        if (!hasChanges)
+            return hasChanges;
+
+        _repository.Update(suggestion);
+        await _repository.SaveChangesAsync();
+        return hasChanges;
+    }
+
+    public async Task SubscribeSuggestionAsync(int suggestionId, string userId)
+    {
+        var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
+            ?? throw new Exception("Sugestão não encontrada.");
+        suggestion.AddSubscription(userId);
         _repository.Update(suggestion);
         await _repository.SaveChangesAsync();
     }
 
-    public async Task RemoveLikeAsync(int suggestionId, string userId)
+    public async Task RemoveSubscriptionAsync(int suggestionId, string userId)
     {
         var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
             ?? throw new Exception("Sugestão não encontrada.");
-        suggestion.RemoveLike(userId);
+        suggestion.RemoveSubscription(userId);
         _repository.Update(suggestion);
         await _repository.SaveChangesAsync();
     }
@@ -131,7 +172,7 @@ public class SuggestionService : ISuggestionService
         await _repository.SaveChangesAsync();
     }
 
-    public async Task AddEventAsync(int suggestionId, string userId, string userName, string? action = null, string? description = null, string? newStatus = null)
+    public async Task AddEventAsync(int suggestionId, string userId, string userName, bool isPublic, string? action = null, string? description = null, string? newStatus = null)
     {
         var suggestion = await _repository.GetAggregateByIdAsync(suggestionId)
             ?? throw new Exception("Sugestão não encontrada.");
@@ -146,7 +187,7 @@ public class SuggestionService : ISuggestionService
             statusToUpdate = parsedStatus;
         }
 
-        suggestion.AddEvent(userId, userName, action, description, statusToUpdate);
+        suggestion.AddEvent(userId, userName, isPublic, action, description, statusToUpdate);
         _repository.Update(suggestion);
         await _repository.SaveChangesAsync();
     }

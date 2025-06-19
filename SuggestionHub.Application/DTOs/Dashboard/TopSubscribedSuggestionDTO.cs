@@ -1,8 +1,8 @@
 ﻿namespace SuggestionHub.Application.DTOs.Dashboard;
 
-public class TopLikedSuggestionDTO
+public class TopSubscribedSuggestionDTO
 {
     public int Id { get; set; }
     public string Title { get; set; } = null!;
-    public int LikeCount { get; set; }
+    public int SubscriptionCount { get; set; }
 }
