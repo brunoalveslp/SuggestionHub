@@ -61,8 +61,8 @@ UpgradeHub/
 3. Instale dependências e rode o frontend:
 
    ```bash
-   npm install
-   npm run dev
+   yarn install
+   yarn dev
    ```
 
 ---
