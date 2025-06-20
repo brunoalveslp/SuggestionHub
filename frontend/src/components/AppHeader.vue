@@ -1,52 +1,54 @@
-<!-- src/components/layouts/MainLayout.vue -->
-<template>
-  <v-navigation-drawer v-model="isDrawerOpen" class="pt-8 mt-10">
-    <v-list>
-      <v-list-item v-if="isAdmin" link :to="'/'" prepend-icon="mdi-monitor-dashboard">Dashboard</v-list-item>
-      <v-list-item link :to="'/suggestion'" prepend-icon="mdi-head-lightbulb-outline">Sugestões</v-list-item>
+  <!-- src/components/layouts/MainLayout.vue -->
+  <template>
+    <v-navigation-drawer v-model="isDrawerOpen" class="pt-8 mt-10">
+      <v-list>
+        <v-list-item v-if="isAdmin" link :to="'/'" prepend-icon="mdi-monitor-dashboard">Dashboard</v-list-item>
+        <v-list-item link :to="'/suggestion'" prepend-icon="mdi-head-lightbulb-outline">Sugestões</v-list-item>
 
-      <!-- Visível apenas para Admin -->
-      <v-list-item
-        v-if="isAdmin"
-        link
-        :to="'/category'"
-        prepend-icon="mdi-certificate-outline"
-      >
-        Categorias
-      </v-list-item>
-    </v-list>
-  </v-navigation-drawer>
+        <!-- Visível apenas para Admin -->
+        <v-list-item v-if="isAdmin" link :to="'/category'" prepend-icon="mdi-certificate-outline">
+          Categorias
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-  <v-app-bar flat class="border-b mb-5">
-    <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen" />
-    <v-app-bar-title>Suggestion Hub</v-app-bar-title>
+    <v-app-bar flat class="border-b mb-5">
+      <v-app-bar-nav-icon @click="isDrawerOpen = !isDrawerOpen" />
+      <v-app-bar-title>Suggestion Hub</v-app-bar-title>
 
-    <template #append>
-      <v-menu>
-        <template #activator="{ props }">
-          <v-btn icon class="mr-2" v-bind="props">
-            <v-badge color="info" dot>
-              <v-icon>mdi-bell-outline</v-icon>
-            </v-badge>
-          </v-btn>
-        </template>
-        <!-- Notificações aqui -->
-      </v-menu>
-
-      <UserAvatar @logout="handleLogout" />
-    </template>
-  </v-app-bar>
-</template>
+      <template #append>
+        <v-menu>
+          <template #activator="{ props }">
+            <v-btn icon class="mr-2" v-bind="props">
+              <v-badge color="info" dot>
+                <v-icon>mdi-bell-outline</v-icon>
+              </v-badge>
+            </v-btn>
+          </template>
+          <!-- Notificações aqui -->
+        </v-menu>
+        <v-btn icon @click="$emit('toggle-theme')">
+          <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+        </v-btn>
+        <UserAvatar @logout="handleLogout" />
+      </template>
+    </v-app-bar>
+  </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { logout } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
+import { useTheme } from 'vuetify'
 
 const isDrawerOpen = ref(false)
 const router = useRouter()
 const authStore = useAuthStore()
+
+
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
 
 function handleLogout() {
   logout()

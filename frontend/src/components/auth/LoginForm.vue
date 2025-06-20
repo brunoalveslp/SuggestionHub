@@ -4,44 +4,21 @@
     <v-img src="../../assets/logo-hiperador.svg" max-height="30" class="mb-6" contain />
     <div class="text-subtitle-1 font-weight-bold mb-2">Entre com seu e-mail e senha</div>
 
-    <v-text-field
-      density="compact"
-      v-model="email"
-      label="E-mail"
-      prepend-inner-icon="mdi-account"
-      type="email"
-      variant="outlined"
-    />
+    <v-text-field density="compact" v-model="email" label="E-mail" prepend-inner-icon="mdi-account" type="email"
+      variant="outlined" />
 
-    <v-text-field
-      density="compact"
-      v-model="password"
-      :type="showPassword ? 'text' : 'password'"
-      label="Senha"
-      prepend-inner-icon="mdi-lock"
-      :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-      @click:append-inner="showPassword = !showPassword"
-      variant="outlined"
-    />
+    <v-text-field density="compact" v-model="password" :type="showPassword ? 'text' : 'password'" label="Senha"
+      prepend-inner-icon="mdi-lock" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+      @click:append-inner="showPassword = !showPassword" variant="outlined" />
 
     <div class="text-caption">
       <a href="#" class="text-primary">Esqueci minha senha</a>
     </div>
 
-    <v-checkbox
-      v-model="remember"
-      label="Lembrar-me nesse computador"
-      density="compact"
-    />
+    <v-checkbox v-model="remember" label="Lembrar-me nesse computador" density="compact" />
 
-    <v-btn
-      :loading="loading"
-      color="primary"
-      class="text-white"
-      block
-      append-icon="mdi-chevron-right"
-      @click="handleLogin"
-    >
+    <v-btn :loading="loading" color="primary" class="text-white" block append-icon="mdi-chevron-right"
+      @click="handleLogin">
       Entrar
     </v-btn>
   </v-card>
@@ -90,10 +67,14 @@ const handleLogin = async () => {
   z-index: 10;
   width: 100%;
   max-width: 480px;
-  background: white;
+  padding: 48px;
+  box-shadow: 20px 35px 60px rgba(0, 0, 0, 0.7);
+  color: var(--v-theme-on-background);
   padding: 48px;
   box-shadow: 20px 35px 60px rgba(0, 0, 0, 0.7);
 }
+
+
 
 .form-wrapper {
   letter-spacing: 0.7px;

@@ -1,27 +1,14 @@
 <template>
   <v-container fluid>
     <!-- Filtro mês e ano -->
-    <v-row class="d-flex align-center justify-end" >
+    <v-row class="d-flex align-center justify-end">
       <v-col cols="12" sm="4" md="3" class="align-self-start pa-0 ma-0">
-        <v-select
-          v-model="selectedMonth"
-          :items="months"
-          label="Mês"
-          density="compact"
-          outlined
-          item-title="label"
-          item-value="value"
-        />
+        <v-select v-model="selectedMonth" :items="months" label="Mês" density="compact" outlined item-title="label"
+          item-value="value" />
       </v-col>
 
       <v-col cols="12" sm="4" md="3" class="align-self-start pa-0 ma-0">
-        <v-select
-          v-model="selectedYear"
-          :items="years"
-          label="Ano"
-          density="compact"
-          outlined
-        />
+        <v-select v-model="selectedYear" :items="years" label="Ano" density="compact" outlined />
       </v-col>
 
       <v-col cols="12" sm="4" md="2" class="align-self-start pa-0 ma-0">
@@ -48,7 +35,7 @@
       <v-col cols="12" md="4">
         <v-card class="pa-4">
           <h3>Total de Subscrições no Mês</h3>
-          <p class="text-h4">{{ dashboardSummary?.totalLikes ?? 0 }}</p>
+          <p class="text-h4">{{ dashboardSummary?.totalSubscriptions ?? 0 }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -58,15 +45,11 @@
       <v-col cols="12" md="6">
         <v-card class="pa-4">
           <h3>Top 10 Mais Votadas</h3>
-          <v-list v-if="dashboardSummary?.topLiked?.length">
-            <v-list-item
-              v-for="suggestion in dashboardSummary.topLiked.slice(0, 10)"
-              :key="suggestion.id"
-              :to="`/suggestion/${suggestion.id}`"
-              link
-            >
+          <v-list v-if="dashboardSummary?.topSubscribed?.length">
+            <v-list-item v-for="suggestion in dashboardSummary.topSubscribed.slice(0, 10)" :key="suggestion.id"
+              :to="`/suggestion/${suggestion.id}`" link>
               <v-list-item-title>
-                #{{ suggestion.id }} {{ suggestion.title }} ({{ suggestion.likeCount }} subscrições)
+                #{{ suggestion.id }} {{ suggestion.title }} ({{ suggestion.subscriptionCount }} subscrições)
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -89,6 +72,11 @@ import { ref, onMounted } from 'vue'
 import { fetchMonthlySummary } from '@/services/suggestion'
 import type { DashboardSummary } from '@/types/suggestion/dashboardSummaryDTO'
 import type { ChartData } from 'chart.js'
+import { useTheme } from 'vuetify'
+import { watch } from 'vue'
+
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
 
 const dashboardSummary = ref<DashboardSummary | null>(null)
 const suggestionsByDayData = ref<ChartData<'bar'>>()
@@ -119,10 +107,11 @@ async function loadDashboardData() {
   try {
     const data = await fetchMonthlySummary(selectedMonth.value, selectedYear.value)
     dashboardSummary.value = data
-    console.log('Dashboard data:', data)
 
-    const dayLabels = data.suggestionsByDay.map(d => d.day)
-    const dayValues = data.suggestionsByDay.map(d => d.count)
+    updateChart()
+
+    const dayLabels = data.suggestionsByDay.map(item => item.day)
+    const dayValues = data.suggestionsByDay.map(item => item.count)
 
     suggestionsByDayData.value = {
       labels: dayLabels,
@@ -130,7 +119,7 @@ async function loadDashboardData() {
         {
           label: 'Sugestões',
           data: dayValues,
-          backgroundColor: '#42a5f5',
+          backgroundColor: isDark.value ? '#90caf9' : '#42a5f5',
         },
       ],
     }
@@ -138,6 +127,31 @@ async function loadDashboardData() {
     console.error('Erro ao carregar dados do dashboard:', error)
   }
 }
+
+function updateChart() {
+  if (!dashboardSummary.value) return
+
+  const dayLabels = dashboardSummary.value.suggestionsByDay.map(item => item.day)
+  const dayValues = dashboardSummary.value.suggestionsByDay.map(item => item.count)
+
+  suggestionsByDayData.value = {
+    labels: dayLabels,
+    datasets: [
+      {
+        label: 'Sugestões',
+        data: dayValues,
+        backgroundColor: isDark.value ? '#90caf9' : '#42a5f5',
+      },
+    ],
+  }
+}
+
+
+watch(isDark, () => {
+  if (dashboardSummary.value) {
+    updateChart()
+  }
+})
 
 onMounted(() => {
   loadDashboardData()

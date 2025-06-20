@@ -6,19 +6,39 @@
         <!-- Título e Categoria -->
         <v-row class="align-center mb-4" no-gutters>
           <v-col>
-            <v-text-field v-model="form.title" label="Título" density="compact" required :counter="150"
-              maxlength="150" />
+            <v-text-field
+              v-model="form.title"
+              label="Título"
+              density="compact"
+              required
+              :counter="150"
+              maxlength="150"
+            />
           </v-col>
           <v-col cols="auto" class="ml-2">
-            <v-select :items="categories" item-value="id" item-title="name" :model-value="form.categoryId"
-              @update:modelValue="val => form.categoryId = val as number | null" label="Categoria" density="compact"
-              style="width: 10rem" required />
+            <v-select
+              :items="categories"
+              item-value="id"
+              item-title="name"
+              :model-value="form.categoryId"
+              @update:modelValue="val => form.categoryId = val as number | null"
+              label="Categoria"
+              density="compact"
+              style="width: 10rem"
+              required
+            />
           </v-col>
         </v-row>
         <v-row>
           <v-col>
-            <v-text-field v-model="form.subject" label="Assunto" density="compact" required :counter="150"
-              maxlength="150" />
+            <v-text-field
+              v-model="form.subject"
+              label="Assunto"
+              density="compact"
+              required
+              :counter="150"
+              maxlength="150"
+            />
           </v-col>
         </v-row>
         <!-- Descrição -->
@@ -27,33 +47,60 @@
         <!-- Toolbar -->
         <div class="toolbar mb-2 d-flex align-center justify-center flex-wrap">
           <!-- Tamanho da fonte -->
-          <v-select :items="['12px', '14px', '16px', '18px', '24px', '32px']" v-model="selectedFontSize"
-            @update:modelValue="applyFontSize" label="Tamanho" density="compact" hide-details
-            style="max-width: 100px;" />
+          <v-select
+            :items="['12px', '14px', '16px', '18px', '24px', '32px']"
+            v-model="selectedFontSize"
+            @update:modelValue="applyFontSize"
+            label="Tamanho"
+            density="compact"
+            hide-details
+            style="max-width: 100px;"
+          />
 
           <!-- Negrito / Itálico -->
-          <v-btn @click="editor.chain().focus().toggleBold().run()"
-            :color="editor.isActive('bold') ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="editor.chain().focus().toggleBold().run()"
+            :color="editor.isActive('bold') ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-bold</v-icon>
           </v-btn>
-          <v-btn @click="editor.chain().focus().toggleItalic().run()"
-            :color="editor.isActive('italic') ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="editor.chain().focus().toggleItalic().run()"
+            :color="editor.isActive('italic') ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-italic</v-icon>
           </v-btn>
 
           <!-- Cor -->
-          <v-menu v-model="colorMenu" offset-y :close-on-content-click="false" max-width="300">
+          <v-menu
+            v-model="colorMenu"
+            offset-y
+            :close-on-content-click="false"
+            max-width="300"
+          >
             <template #activator="{ props }">
-              <v-btn v-bind="props" size="small" :style="{
-                backgroundColor: selectedColor,
-                color: isLightColor(selectedColor) ? '#000' : '#fff',
-              }">
+              <v-btn
+                v-bind="props"
+                size="small"
+                :style="{
+                  backgroundColor: selectedColor,
+                  color: isLightColor(selectedColor) ? '#000' : '#fff',
+                }"
+              >
                 <v-icon>mdi-format-color-fill</v-icon>
               </v-btn>
             </template>
             <v-card>
-              <v-color-picker v-model="tempColor" hide-canvas hide-inputs show-swatches mode="hexa"
-                swatches-max-height="150" />
+              <v-color-picker
+                v-model="tempColor"
+                hide-canvas
+                hide-inputs
+                show-swatches
+                mode="hexa"
+                swatches-max-height="150"
+              />
               <v-card-actions class="justify-end">
                 <v-btn color="primary" @click="applyColor(editor)">Aplicar</v-btn>
               </v-card-actions>
@@ -61,24 +108,41 @@
           </v-menu>
 
           <!-- Listas -->
-          <v-btn @click="applyBulletList" :color="editor.isActive('bulletList') ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="applyBulletList"
+            :color="editor.isActive('bulletList') ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-list-bulleted</v-icon>
           </v-btn>
-          <v-btn @click="applyOrderedList" :color="editor.isActive('orderedList') ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="applyOrderedList"
+            :color="editor.isActive('orderedList') ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-list-numbered</v-icon>
           </v-btn>
 
           <!-- Alinhamento -->
-          <v-btn @click="editor.chain().focus().setTextAlign('left').run()"
-            :color="editor.isActive({ textAlign: 'left' }) ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="editor.chain().focus().setTextAlign('left').run()"
+            :color="editor.isActive({ textAlign: 'left' }) ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-align-left</v-icon>
           </v-btn>
-          <v-btn @click="editor.chain().focus().setTextAlign('center').run()"
-            :color="editor.isActive({ textAlign: 'center' }) ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="editor.chain().focus().setTextAlign('center').run()"
+            :color="editor.isActive({ textAlign: 'center' }) ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-align-center</v-icon>
           </v-btn>
-          <v-btn @click="editor.chain().focus().setTextAlign('right').run()"
-            :color="editor.isActive({ textAlign: 'right' }) ? 'primary' : undefined" size="small">
+          <v-btn
+            @click="editor.chain().focus().setTextAlign('right').run()"
+            :color="editor.isActive({ textAlign: 'right' }) ? 'primary' : undefined"
+            size="small"
+          >
             <v-icon>mdi-format-align-right</v-icon>
           </v-btn>
 
@@ -88,7 +152,12 @@
           </v-btn>
 
           <!-- Tela cheia -->
-          <v-btn color="secondary" class="ml-auto" size="small" @click="openFullScreenEditor = true">
+          <v-btn
+            color="secondary"
+            class="ml-auto"
+            size="small"
+            @click="openFullScreenEditor = true"
+          >
             <v-icon left>mdi-fullscreen</v-icon> Tela Cheia
           </v-btn>
         </div>
@@ -102,8 +171,7 @@
       <v-card-actions>
         <v-spacer />
         <v-hover v-slot:default="{ isHovering, props }">
-          <v-btn v-bind="props" :variant="isHovering ? 'outlined' : 'elevated'" color="primary"
-            @click="submitSuggestion">
+          <v-btn v-bind="props" :variant="isHovering ? 'outlined' : 'elevated'" color="primary" @click="saveEdit">
             Salvar
           </v-btn>
         </v-hover>
@@ -120,33 +188,60 @@
           <v-toolbar-title>Edição em Tela Cheia</v-toolbar-title>
           <div class="toolbar mb-2 d-flex align-center justify-center flex-wrap">
             <!-- Tamanho da fonte -->
-            <v-select :items="['12px', '14px', '16px', '18px', '24px', '32px']" v-model="selectedFontSize"
-              @update:modelValue="applyFontSize" label="Tamanho" density="compact" hide-details
-              style="max-width: 100px;" />
+            <v-select
+              :items="['12px', '14px', '16px', '18px', '24px', '32px']"
+              v-model="selectedFontSize"
+              @update:modelValue="applyFontSize"
+              label="Tamanho"
+              density="compact"
+              hide-details
+              style="max-width: 100px;"
+            />
 
             <!-- Negrito / Itálico -->
-            <v-btn @click="editorFullScreen.chain().focus().toggleBold().run()"
-              :color="editorFullScreen.isActive('bold') ? 'primary' : undefined" size="small">
+            <v-btn
+              @click="editorFullScreen.chain().focus().toggleBold().run()"
+              :color="editorFullScreen.isActive('bold') ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-bold</v-icon>
             </v-btn>
-            <v-btn @click="editorFullScreen.chain().focus().toggleItalic().run()"
-              :color="editorFullScreen.isActive('italic') ? 'primary' : undefined" size="small">
+            <v-btn
+              @click="editorFullScreen.chain().focus().toggleItalic().run()"
+              :color="editorFullScreen.isActive('italic') ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-italic</v-icon>
             </v-btn>
 
             <!-- Cor -->
-            <v-menu v-model="colorMenuFullScreen" offset-y :close-on-content-click="false" max-width="300">
+            <v-menu
+              v-model="colorMenuFullScreen"
+              offset-y
+              :close-on-content-click="false"
+              max-width="300"
+            >
               <template #activator="{ props }">
-                <v-btn v-bind="props" size="small" :style="{
-                  backgroundColor: selectedColor,
-                  color: isLightColor(selectedColor) ? '#000' : '#fff',
-                }">
+                <v-btn
+                  v-bind="props"
+                  size="small"
+                  :style="{
+                    backgroundColor: selectedColor,
+                    color: isLightColor(selectedColor) ? '#000' : '#fff',
+                  }"
+                >
                   <v-icon>mdi-format-color-fill</v-icon>
                 </v-btn>
               </template>
               <v-card>
-                <v-color-picker v-model="tempColor" hide-canvas hide-inputs show-swatches mode="hexa"
-                  swatches-max-height="150" />
+                <v-color-picker
+                  v-model="tempColor"
+                  hide-canvas
+                  hide-inputs
+                  show-swatches
+                  mode="hexa"
+                  swatches-max-height="150"
+                />
                 <v-card-actions class="justify-end">
                   <v-btn color="primary" @click="applyColor(editorFullScreen)">Aplicar</v-btn>
                 </v-card-actions>
@@ -154,26 +249,41 @@
             </v-menu>
 
             <!-- Listas -->
-            <v-btn @click="applyBulletList" :color="editorFullScreen.isActive('bulletList') ? 'primary' : undefined"
-              size="small">
+            <v-btn
+              @click="applyBulletList"
+              :color="editorFullScreen.isActive('bulletList') ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-list-bulleted</v-icon>
             </v-btn>
-            <v-btn @click="applyOrderedList" :color="editorFullScreen.isActive('orderedList') ? 'primary' : undefined"
-              size="small">
+            <v-btn
+              @click="applyOrderedList"
+              :color="editorFullScreen.isActive('orderedList') ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-list-numbered</v-icon>
             </v-btn>
 
             <!-- Alinhamento -->
-            <v-btn @click="editorFullScreen.chain().focus().setTextAlign('left').run()"
-              :color="editorFullScreen.isActive({ textAlign: 'left' }) ? 'primary' : undefined" size="small">
+            <v-btn
+              @click="editorFullScreen.chain().focus().setTextAlign('left').run()"
+              :color="editorFullScreen.isActive({ textAlign: 'left' }) ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-align-left</v-icon>
             </v-btn>
-            <v-btn @click="editorFullScreen.chain().focus().setTextAlign('center').run()"
-              :color="editorFullScreen.isActive({ textAlign: 'center' }) ? 'primary' : undefined" size="small">
+            <v-btn
+              @click="editorFullScreen.chain().focus().setTextAlign('center').run()"
+              :color="editorFullScreen.isActive({ textAlign: 'center' }) ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-align-center</v-icon>
             </v-btn>
-            <v-btn @click="editorFullScreen.chain().focus().setTextAlign('right').run()"
-              :color="editorFullScreen.isActive({ textAlign: 'right' }) ? 'primary' : undefined" size="small">
+            <v-btn
+              @click="editorFullScreen.chain().focus().setTextAlign('right').run()"
+              :color="editorFullScreen.isActive({ textAlign: 'right' }) ? 'primary' : undefined"
+              size="small"
+            >
               <v-icon>mdi-format-align-right</v-icon>
             </v-btn>
 
@@ -227,29 +337,27 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { createSuggestion } from '@/services/suggestion'
+import { fetchSuggestionById, updateSuggestion } from '@/services/suggestion'
 import { fetchCategories } from '@/services/category'
+import type { CategoryDTO } from '@/types/category/categoryDTO'
+import type { SuggestionDetailsDTO } from '@/types/suggestion/suggestionDetailsDTO'
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
+import { Mark, Node, mergeAttributes } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import Color from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
-import { Mark, Node, mergeAttributes } from '@tiptap/core'
-import type { CategoryDTO } from '@/types/category/categoryDTO'
 
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-const categories = ref<CategoryDTO[]>([])
 
-const form = ref({
-  title: '',
-  subject: '',
-  description: `Comportamento Atual:<br><br>Comportamento Desejado:<br>`,
-  categoryId: null as number | null,
-})
+const rawId = (route.params as { id: string }).id
+const id = typeof rawId === 'string' ? Number(rawId) : NaN
+const categories = ref<CategoryDTO[]>([])
 
 const selectedFontSize = ref('16px')
 const selectedColor = ref('#000000')
@@ -260,6 +368,14 @@ const openFullScreenEditor = ref(false)
 const openImageDialog = ref(false)
 const openImageDialogFullScreen = ref(false)
 const imageUrl = ref('')
+
+const form = ref({
+  title: '',
+  subject: '',
+  description: '',
+  categoryId: 0,
+  userId: ''
+})
 
 // Custom mark para tamanho da fonte
 const FontSize = Mark.create({
@@ -313,9 +429,10 @@ const CustomImageNode = Node.create({
   },
 })
 
+
 // Criando o editor
 const editor = new Editor({
-  content: form.value.description,
+  content: '',
   extensions: [
     StarterKit,
     CustomImageNode,
@@ -327,24 +444,10 @@ const editor = new Editor({
   onUpdate: ({ editor }) => {
     form.value.description = editor.getHTML()
   },
-  onSelectionUpdate: ({ editor }) => {
-    // Tamanho da fonte
-    const fontSizeAttr = editor.getAttributes('fontSize')
-    if (fontSizeAttr?.style) {
-      selectedFontSize.value = fontSizeAttr.style
-    }
-
-    // Cor do texto
-    const textStyleAttrs = editor.getAttributes('textStyle')
-    if (textStyleAttrs?.color) {
-      selectedColor.value = textStyleAttrs.color
-      tempColor.value = textStyleAttrs.color
-    }
-  }
 })
 
 const editorFullScreen = new Editor({
-  content: form.value.description,
+  content: '',
   extensions: [
     StarterKit.configure({}),
     CustomImageNode,
@@ -353,20 +456,6 @@ const editorFullScreen = new Editor({
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     FontSize,
   ],
-  onSelectionUpdate: ({ editor }) => {
-    // Tamanho da fonte
-    const fontSizeAttr = editor.getAttributes('fontSize')
-    if (fontSizeAttr?.style) {
-      selectedFontSize.value = fontSizeAttr.style
-    }
-
-    // Cor do texto
-    const textStyleAttrs = editor.getAttributes('textStyle')
-    if (textStyleAttrs?.color) {
-      selectedColor.value = textStyleAttrs.color
-      tempColor.value = textStyleAttrs.color
-    }
-  }
 })
 
 watch(openFullScreenEditor, (newVal) => {
@@ -436,8 +525,36 @@ function isLightColor(hex: string): boolean {
   return luminance > 186
 }
 
-// Salvar sugestão
-async function submitSuggestion() {
+
+// Salvar conteúdo da edição em tela cheia
+function saveFullScreenContent() {
+  const content = editorFullScreen.getJSON()
+  editor.commands.setContent(content)
+  form.value.description = editor.getHTML()
+  openFullScreenEditor.value = false
+}
+
+function closeFullScreen(){
+  openFullScreenEditor.value = false;
+  saveFullScreenContent()
+}
+
+
+
+onMounted(async () => {
+  categories.value = await fetchCategories()
+  const data: SuggestionDetailsDTO = await fetchSuggestionById(id)
+  form.value = {
+    title: data.title,
+    subject: data.subject,
+    description: data.description,
+    categoryId: data.categoryId,
+    userId: auth.userId ?? ''
+  }
+  editor.commands.setContent(data.description)
+})
+
+async function saveEdit() {
   if (!form.value.title || !form.value.description || !form.value.categoryId) {
     alert('Preencha todos os campos.')
     return
@@ -449,34 +566,13 @@ async function submitSuggestion() {
   }
 
   try {
-    await createSuggestion({
-      ...form.value,
-      categoryId: form.value.categoryId!,
-      userId: auth.userId,
-    })
-
+    await updateSuggestion(id, {...form.value})
     router.push('/suggestion')
   } catch (error) {
-    alert('Erro ao criar sugestão: ' + (error instanceof Error ? error.message : ''))
+    alert('Erro ao atualizar sugestão')
+    console.error(error)
   }
 }
-
-// Salvar conteúdo da edição em tela cheia
-function saveFullScreenContent() {
-  const content = editorFullScreen.getJSON()
-  editor.commands.setContent(content)
-  form.value.description = editor.getHTML()
-  openFullScreenEditor.value = false
-}
-
-function closeFullScreen() {
-  openFullScreenEditor.value = false;
-  saveFullScreenContent()
-}
-
-onMounted(async () => {
-  categories.value = await fetchCategories()
-})
 </script>
 
 <style scoped>
@@ -492,16 +588,10 @@ onMounted(async () => {
 }
 
 .wysiwyg img {
-  max-width: 8500px !important;
+  max-width: 100%;
   height: auto;
   border-radius: 8px;
   margin: 0.5rem 0;
   display: block;
-}
-
-.toolbar {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
 }
 </style>

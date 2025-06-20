@@ -1,22 +1,28 @@
 <template>
   <v-container fluid>
+    <v-row cols="12">
+      <v-col>
+        <template v-if="suggestion && isAdmin">
+          <div class="d-flex justify-space-between align-center">
+            <v-spacer></v-spacer>
+            <v-btn>
+              <v-btn color="primary" :to="`/suggestion/edit/${suggestion.id}`" component="RouterLink">
+                <v-icon left>mdi-pencil</v-icon>
+                Editar
+              </v-btn>
+            </v-btn>
+          </div>
+        </template>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12" md="8">
         <template v-if="suggestion">
-          <SuggestionDetailsCard
-            :suggestion="suggestion"
-            :userId="userId"
-            :isAdmin="isAdmin"
-            @status-updated="loadSuggestion(true)"
-          />
+          <SuggestionDetailsCard :suggestion="suggestion" :userId="userId" :isAdmin="isAdmin"
+            @status-updated="loadSuggestion(true)" />
 
-          <SuggestionCommentsCard
-            :comments="suggestion.comments || []"
-            :suggestionId="suggestion.id"
-            :userId="userId"
-            :isAdmin="isAdmin"
-            @refresh="loadSuggestion(true)"
-          />
+          <SuggestionCommentsCard :comments="suggestion.comments || []" :suggestionId="suggestion.id" :userId="userId"
+            :isAdmin="isAdmin" @refresh="loadSuggestion(true)" />
         </template>
 
         <template v-else>
@@ -26,12 +32,20 @@
       </v-col>
 
       <v-col cols="12" md="4">
-        <template v-if="suggestion && isAdmin">
-          <SuggestionEventsCard :events="suggestion.events || []" />
+        <template v-if="suggestion">
+          <template v-if="suggestion.events && suggestion.events.length > 0">
+            <SuggestionEventsCard :events="suggestion.events" />
+          </template>
+          <template v-else>
+            <v-card class="pa-4" elevation="1">
+              <div class="text-subtitle-2">Não há eventos para esta sugestão.</div>
+            </v-card>
+          </template>
         </template>
         <template v-else>
           <v-skeleton-loader type="card" />
         </template>
+
       </v-col>
     </v-row>
   </v-container>
@@ -57,7 +71,7 @@ const userId = computed(() => authStore.userId ?? '')
 
 
 async function loadSuggestion(forceRefresh = false) {
-  const rawId = route.params.id
+  const rawId = (route.params as { id: string }).id
   const id = typeof rawId === 'string' ? Number(rawId) : NaN
   if (isNaN(id)) return
 

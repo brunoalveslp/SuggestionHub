@@ -3,7 +3,8 @@ export interface SuggestionEventDTO {
   suggestionId: number
   userId: string
   userName: string
+  isPublic: boolean
   action: string
   changeDescription?: string | null
-  changeDate: string // DateTime vindo como string ISO
+  changeDate: string
 }

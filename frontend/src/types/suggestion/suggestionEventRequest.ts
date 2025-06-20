@@ -2,7 +2,8 @@
 export interface SuggestionEventRequest {
   userId: string
   userName: string
+  isPublic: boolean
   action: string
   changeDescription?: string | null
-  newStatus: number
+  newStatus: string
 }

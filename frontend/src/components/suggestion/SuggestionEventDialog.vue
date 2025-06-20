@@ -7,6 +7,11 @@
           v-model="statusOnly"
           label="Atualizar somente status"
         />
+        <v-checkbox
+          v-if="!statusOnly"
+          v-model="isPublic"
+          label="Este evento é publico?"
+        />
         <v-select
           v-model="selectedStatus"
           label="Novo Status"
@@ -60,6 +65,7 @@ const authStore = useAuthStore()
 
 const selectedStatus = ref(props.currentStatus)
 const statusOnly = ref(false)
+const isPublic = ref(false)
 const action = ref('')
 const description = ref('')
 
@@ -84,12 +90,15 @@ const statusEnum = {
 const actionOptions = ['Status Alterado', 'Retorno', 'Comentário Interno']
 
 async function submitEvent() {
+  if(authStore.displayName == null) return;
+
   await addSuggestionEvent(props.suggestionId, {
     userId: authStore.userId!,
     userName: authStore.displayName,
+    isPublic: isPublic.value,
     action: action.value || 'Status Alterado',
     changeDescription: statusOnly.value ? null : description.value,
-    newStatus: statusEnum[selectedStatus.value]
+    newStatus: statusEnum[selectedStatus.value as keyof typeof statusEnum]
   })
 
   emit('update:modelValue', false)

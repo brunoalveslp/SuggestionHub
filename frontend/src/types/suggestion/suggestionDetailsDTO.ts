@@ -5,6 +5,7 @@ import type { CommentDTO } from './commentDTO'
 export interface SuggestionDetailsDTO {
   id: number
   title: string
+  subject: string
   description: string
   status: SuggestionStatus
   categoryId: number
@@ -13,7 +14,7 @@ export interface SuggestionDetailsDTO {
   lastUpdatedAt?: string | null // Date opcional (nullable)
 
   events: SuggestionEventDTO[]
-  likeCount: number
-  hasUserLiked: boolean
+  subscriptionCount: number
+  hasUserSubscribed: boolean
   comments: CommentDTO[]
 }

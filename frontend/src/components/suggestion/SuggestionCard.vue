@@ -25,9 +25,9 @@
       <v-row class="w-100 d-flex" align="center" justify="space-between" no-gutters>
         <!-- Botão de subscrição -->
         <v-col cols="auto">
-          <v-btn :color="suggestion.hasUserLiked ? 'primary' : 'secondary'"
-            :variant="suggestion.hasUserLiked ? 'elevated' : 'outlined'" @click="dialogVisible = true">
-            {{ suggestion.hasUserLiked ? 'Subscrito' : 'Subscrever' }}
+          <v-btn :color="suggestion.hasUserSubscribed ? 'primary' : 'secondary'"
+            :variant="suggestion.hasUserSubscribed ? 'elevated' : 'outlined'" @click="dialogVisible = true">
+            {{ suggestion.hasUserSubscribed ? 'Subscrito' : 'Subscrever' }}
           </v-btn>
         </v-col>
 
@@ -38,7 +38,7 @@
             <span class="mr-4">{{ suggestion.commentCount }}</span>
 
             <v-icon small class="mr-1">mdi-thumb-up</v-icon>
-            <span>{{ suggestion.likeCount }}</span>
+            <span>{{ suggestion.subscriptionCount }}</span>
           </div>
         </v-col>
       </v-row>
@@ -50,10 +50,10 @@
   <v-dialog v-model="dialogVisible" max-width="400">
     <v-card>
       <v-card-title class="text-h6">
-        {{ suggestion.hasUserLiked ? 'Remover subscrição?' : 'Confirmar subscrição?' }}
+        {{ suggestion.hasUserSubscribed ? 'Remover subscrição?' : 'Confirmar subscrição?' }}
       </v-card-title>
       <v-card-text>
-        {{ suggestion.hasUserLiked
+        {{ suggestion.hasUserSubscribed
           ? 'Você deseja remover sua subscrição desta sugestão?'
           : 'Você deseja se subscrever nesta sugestão?' }}
       </v-card-text>
@@ -67,7 +67,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { likeSuggestion, removeLikeSuggestion, fetchSuggestionById } from '@/services/suggestion'
+import { subscribeSuggestion, removeSubscriptionSuggestion, fetchSuggestionById } from '@/services/suggestion'
 import type { SuggestionDTO } from '@/types/suggestion/suggestionDTO'
 import { SuggestionStatus } from '@/types/suggestion/suggestionStatus'
 
@@ -122,14 +122,14 @@ function formatDate(dateStr: string): string {
 
 async function confirmSubscribe() {
   try {
-    if (suggestion.value.hasUserLiked) {
-      await removeLikeSuggestion(suggestion.value.id, props.userId)
-      suggestion.value.hasUserLiked = false
-      suggestion.value.likeCount = Math.max(0, suggestion.value.likeCount - 1)
+    if (suggestion.value.hasUserSubscribed) {
+      await removeSubscriptionSuggestion(suggestion.value.id, props.userId)
+      suggestion.value.hasUserSubscribed = false
+      suggestion.value.subscriptionCount = Math.max(0, suggestion.value.subscriptionCount - 1)
     } else {
-      await likeSuggestion(suggestion.value.id, props.userId)
-      suggestion.value.hasUserLiked = true
-      suggestion.value.likeCount++
+      await subscribeSuggestion(suggestion.value.id, props.userId)
+      suggestion.value.hasUserSubscribed = true
+      suggestion.value.subscriptionCount++
     }
   } catch (err) {
     console.error('Erro ao alternar subscrição:', err)
@@ -144,7 +144,6 @@ async function preloadDetail() {
     const result = await fetchSuggestionById(suggestion.value.id)
     // Salva no localStorage com chave única para evitar conflito
     localStorage.setItem(`suggestion_${result.id}`, JSON.stringify(result))
-    console.log('Pré-carregado e salvo no localStorage sugestão #', result.id)
   } catch (e) {
     console.error('Erro no preload:', e)
   }

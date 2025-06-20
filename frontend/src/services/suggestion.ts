@@ -39,7 +39,6 @@ export async function fetchSuggestionById(id: number) {
   const res = await axios.get<SuggestionDetailsDTO>(`/suggestion/${id}`, {
     headers: getAuthHeaders(),
   })
-  console.log(res.data)
   return res.data
 }
 
@@ -49,22 +48,27 @@ export async function createSuggestion(request: CreateSuggestionRequest) {
   })
 }
 
-export async function likeSuggestion(suggestionId: number, userId: string) {
-  await axios.post(`/suggestion/${suggestionId}/like`, null, {
+export async function updateSuggestion(id: number, request: CreateSuggestionRequest): Promise<void> {
+  await axios.put(`/suggestion/${id}`, request, {
+    headers: getAuthHeaders(),
+  })
+}
+
+export async function subscribeSuggestion(suggestionId: number, userId: string) {
+  await axios.post(`/suggestion/${suggestionId}/subscription`, null, {
     params: { userId },
     headers: getAuthHeaders(),
   })
 }
 
-export async function removeLikeSuggestion(suggestionId: number, userId: string) {
-  await axios.delete(`/suggestion/${suggestionId}/like`, {
+export async function removeSubscriptionSuggestion(suggestionId: number, userId: string) {
+  await axios.delete(`/suggestion/${suggestionId}/subscription`, {
     params: { userId },
     headers: getAuthHeaders(),
   })
 }
 
 export async function addComment(suggestionId: number, request: CommentRequest) {
-  console.log('suggestion ID add comment',suggestionId)
   await axios.post(`/suggestion/${suggestionId}/comments`, request, {
     headers: getAuthHeaders(),
   })

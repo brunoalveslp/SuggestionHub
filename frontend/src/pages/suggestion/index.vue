@@ -57,9 +57,11 @@
     <!-- Lista de sugestões -->
     <!-- Lista de sugestões -->
     <v-card class="pa-4 mt-3" elevated="4" variant="outlined" style="max-height: 600px; overflow-y: auto;">
-      <v-data-table :headers="headers" :items="suggestions" item-value="id" show-expand class="elevation-1"
+      <v-data-table :headers="headers" :items="suggestions" :items-per-page="-1" item-value="id" show-expand class="elevation-1"
         :expanded.sync="expanded" :hide-default-footer="true">
+
         <!-- Botão expandir na primeira coluna -->
+        <!-- @ts-ignore -->
         <template #data-table-expand="{ item, expand, isExpanded }">
           <td @mouseenter="preloadDetail(item.id)">
             <v-btn icon @click="expand(item)">
@@ -110,6 +112,10 @@
             <td :colspan="headers.length">
               <v-card class="mt-4 pa-4" flat width="100%">
                 <div>
+                  <v-card-subtitle class="ml-0 pl-0">Assunto</v-card-subtitle>
+                  <div class="description-clamp text-body-1 pa-1">{{ item.subject }}</div>
+                </div>
+                <div>
                   <v-card-subtitle class="ml-0 pl-0">Descrição</v-card-subtitle>
                   <div class="description-clamp text-body-1 pa-1" v-html="sanitizeDescription(item.description)"></div>
                 </div>
@@ -120,15 +126,15 @@
                     <span class="mr-4">{{ item.commentCount }}</span>
 
                     <v-icon small class="mr-1">mdi-thumb-up</v-icon>
-                    <span>{{ item.likeCount }}</span>
+                    <span>{{ item.subscriptionCount }}</span>
                   </div>
 
                   <v-hover v-slot:default="{ isHovering, props }">
-                    <v-btn v-bind="props" :color="item.hasUserLiked ? (isHovering ? 'error' : 'secondary') : 'primary'"
+                    <v-btn v-bind="props" :color="item.hasUserSubscribed ? (isHovering ? 'error' : 'secondary') : 'primary'"
                       :variant="isHovering ? 'elevated' : 'outlined'"
-                      @click="openDialogForLike(item, !item.hasUserLiked)">
-                      <template v-if="item.hasUserLiked">
-                        {{ isHovering ? 'Desinscrever' : 'Subscrito' }}
+                      @click="openDialogForSubscription(item, !item.hasUserSubscribed)">
+                      <template v-if="item.hasUserSubscribed">
+                        {{ isHovering ? 'Cancelar inscrição' : 'Subscrito' }}
                       </template>
                       <template v-else>
                         {{ isHovering ? 'Clique para subscrever' : 'Subscrever' }}
@@ -145,14 +151,14 @@
       <div ref="loadMoreTrigger" style="height: 1px;"></div>
     </v-card>
 
-    <!-- Diálogo confirmação like/unlike -->
+    <!-- Diálogo confirmação -->
     <v-dialog v-model="dialogVisible" max-width="400">
       <v-card>
         <v-card-title class="text-h6">
-          {{ dialogActionLike ? 'Confirmar subscrição?' : 'Remover subscrição?' }}
+          {{ dialogActionSubscribe ? 'Confirmar subscrição?' : 'Remover subscrição?' }}
         </v-card-title>
         <v-card-text>
-          {{ dialogActionLike
+          {{ dialogActionSubscribe
             ? 'Você deseja se subscrever nesta sugestão?'
             : 'Você deseja remover sua subscrição desta sugestão?' }}
         </v-card-text>
@@ -170,8 +176,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import {
   fetchSuggestions,
-  likeSuggestion,
-  removeLikeSuggestion,
+  subscribeSuggestion,
+  removeSubscriptionSuggestion,
   fetchSuggestionById
 } from '@/services/suggestion'
 import { fetchCategories } from '@/services/category'
@@ -180,6 +186,7 @@ import type { SuggestionFilterRequest } from '@/types/suggestion/suggestionFilte
 import type { CategoryDTO } from '@/types/category/categoryDTO'
 import { SuggestionStatus } from '@/types/suggestion/suggestionStatus'
 import DOMPurify from 'dompurify'
+import { isTemplateExpression } from 'typescript'
 
 const router = useRouter();
 
@@ -187,7 +194,7 @@ const authStore = useAuthStore()
 const currentUserId = authStore.userId ?? ''
 
 const headers = [
-  { title: '', key: 'data-table-expand' },
+  { title: '', key: 'data-table-expand'},
   { title: 'Título', key: 'title' },
   { title: 'Status', key: 'status' },
   { title: 'Categoria', key: 'categoryId' },
@@ -197,12 +204,12 @@ const headers = [
 const searchTerm = ref('')
 const selectedCategory = ref<number | null>(null)
 const selectedStatus = ref<number | null>(null)
-const sortBy = ref<'CreatedAt' | 'LikeCount' | 'Title'>('CreatedAt')
+const sortBy = ref<'CreatedAt' | 'subscriptionCount' | 'Title'>('CreatedAt')
 const descending = ref(true)
 
 const sortOptions = [
   { value: 'CreatedAt', title: 'Data de criação' },
-  { value: 'LikeCount', title: 'Mais Subscrições' },
+  { value: 'subscriptionCount', title: 'Mais Subscrições' },
   { value: 'Title', title: 'Título' }
 ]
 
@@ -219,7 +226,7 @@ const finished = ref(false)
 const loading = ref(false)
 const loadMoreTrigger = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
-const expanded = ref<number[]>([]) // IDs das linhas expandidas
+const expanded = ref<string[]>([])
 
 const statusOptions = [
   { value: SuggestionStatus.Pending, label: 'Pendente' },
@@ -233,7 +240,7 @@ const statusOptions = [
 // Dialog controls
 const dialogVisible = ref(false)
 const dialogSuggestion = ref<SuggestionDTO | null>(null)
-const dialogActionLike = ref(false)
+const dialogActionSubscribe = ref(false)
 
 async function loadSuggestions(reset = false) {
   if (reset) {
@@ -265,7 +272,8 @@ async function loadSuggestions(reset = false) {
 
     suggestions.value.push(...res.items)
     offset.value += res.items.length
-    finished.value = offset.value >= res.totalCount || res.items.length === 0
+    finished.value = !res.hasMore
+    console.log("carregando mais!")
   } catch (error) {
     console.error('Erro ao carregar sugestões:', error)
   } finally {
@@ -312,9 +320,9 @@ function getCategoryName(categoryId: number) {
   return cat ? cat.name : 'Desconhecido'
 }
 
-function openDialogForLike(suggestion: SuggestionDTO, like: boolean) {
+function openDialogForSubscription(suggestion: SuggestionDTO, subscribe: boolean) {
   dialogSuggestion.value = suggestion
-  dialogActionLike.value = like
+  dialogActionSubscribe.value = subscribe
   dialogVisible.value = true
 }
 
@@ -322,14 +330,14 @@ async function confirmSubscribe() {
   if (!dialogSuggestion.value) return
 
   try {
-    if (dialogActionLike.value) {
-      await likeSuggestion(dialogSuggestion.value.id, currentUserId)
-      dialogSuggestion.value.hasUserLiked = true
-      dialogSuggestion.value.likeCount++
+    if (dialogActionSubscribe.value) {
+      await subscribeSuggestion(dialogSuggestion.value.id, currentUserId)
+      dialogSuggestion.value.hasUserSubscribed = true
+      dialogSuggestion.value.subscriptionCount++
     } else {
-      await removeLikeSuggestion(dialogSuggestion.value.id, currentUserId)
-      dialogSuggestion.value.hasUserLiked = false
-      dialogSuggestion.value.likeCount = Math.max(0, dialogSuggestion.value.likeCount - 1)
+      await removeSubscriptionSuggestion(dialogSuggestion.value.id, currentUserId)
+      dialogSuggestion.value.hasUserSubscribed = false
+      dialogSuggestion.value.subscriptionCount = Math.max(0, dialogSuggestion.value.subscriptionCount - 1)
     }
   } catch (err) {
     console.error('Erro ao alternar subscrição:', err)
@@ -341,7 +349,7 @@ async function confirmSubscribe() {
 function goToSuggestionDetail(id: number) {
   // Navega para detalhes da sugestão
   // Pode fechar a expansão da linha para UX melhor
-  expanded.value = expanded.value.filter(eId => eId !== id)
+  expanded.value = expanded.value.filter(eId => eId !== String(id))
   // Navega para rota detalhada
   window.setTimeout(() => {
     // usar router.push normalmente
@@ -352,11 +360,9 @@ function goToSuggestionDetail(id: number) {
 
 async function preloadDetail(id: number) {
   try {
-    console.log('suggestion ID')
     const result = await fetchSuggestionById(id)
     // Salva no localStorage com chave única para evitar conflito
     localStorage.setItem(`suggestion_${result.id}`, JSON.stringify(result))
-    console.log('Pré-carregado e salvo no localStorage sugestão #', result.id)
   } catch (e) {
     console.error('Erro no preload:', e)
   }

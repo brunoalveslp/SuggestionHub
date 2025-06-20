@@ -2,8 +2,8 @@ import type { SuggestionDTO } from "./suggestionDTO"
 
 export interface DashboardSummary {
   totalSuggestions: number
-  pendingSuggestions: number
-  totalLikes: number
-  topLikedSuggestions: SuggestionDTO[]
+  pendingCount: number
+  totalSubscriptions: number
+  topSubscribed: SuggestionDTO[]
   suggestionsByDay: Record<string, number>
 }

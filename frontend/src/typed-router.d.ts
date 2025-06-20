@@ -24,5 +24,6 @@ declare module 'vue-router/auto-routes' {
     '/suggestion/': RouteRecordInfo<'/suggestion/', '/suggestion', Record<never, never>, Record<never, never>>,
     '/suggestion/[id]': RouteRecordInfo<'/suggestion/[id]', '/suggestion/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/suggestion/create': RouteRecordInfo<'/suggestion/create', '/suggestion/create', Record<never, never>, Record<never, never>>,
+    '/suggestion/edit/[id]': RouteRecordInfo<'/suggestion/edit/[id]', '/suggestion/edit/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 }
