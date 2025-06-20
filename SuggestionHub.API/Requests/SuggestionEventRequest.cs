@@ -7,5 +7,5 @@ public class SuggestionEventRequest
     public bool IsPublic { get; set; }
     public string? Action { get; set; }
     public string? ChangeDescription { get; set; }
-    public string? NewStatus { get; set; } // opcional, ex: "Approved"
+    public string? NewStatus { get; set; }
 }

@@ -167,6 +167,7 @@ public class SuggestionRepository : ISuggestionRepository
                     SuggestionId = e.SuggestionId,
                     UserId = e.UserId,
                     UserName = e.UserName,
+                    IsPublic = e.IsPublic,
                     Action = e.Action,
                     ChangeDescription = e.ChangeDescription,
                     ChangeDate = e.ChangeDate

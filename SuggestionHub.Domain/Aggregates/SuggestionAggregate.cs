@@ -150,7 +150,7 @@ public class SuggestionAggregate
         {
             Status = newStatus.Value;
             statusChanged = true;
-
+            isPublic = true; // Se o status foi alterado, o evento é público por padrão
             // Define valores padrão se não foram fornecidos
             action ??= "Status Alterado";
             changeDescription ??= $"Novo status: {newStatus}";
