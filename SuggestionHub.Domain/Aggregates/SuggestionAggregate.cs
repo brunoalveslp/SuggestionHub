@@ -30,7 +30,7 @@ public class SuggestionAggregate
         if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("É obrigatório uma descrição para a sugesstão");
 
         Title = title ?? string.Empty;
-        Subject = subject ?? string.Empty; 
+        Subject = subject ?? string.Empty;
         Description = description ?? string.Empty;
         CategoryId = categoryId;
         UserId = userId;
@@ -95,14 +95,14 @@ public class SuggestionAggregate
         _subscriptions.Remove(like);
     }
 
-    public void AddComment(string userId,string userName, string content)
+    public void AddComment(string userId, string userName, string content)
     {
         if (string.IsNullOrWhiteSpace(content))
             throw new ArgumentException("O conteúdo do comentário não pode ser vazio.");
         _comments.Add(new Comment
         {
             UserId = userId,
-            UserName = userName, 
+            UserName = userName,
             SuggestionId = Id,
             Content = content,
             CreatedAt = DateTime.UtcNow
@@ -153,7 +153,7 @@ public class SuggestionAggregate
             isPublic = true; // Se o status foi alterado, o evento é público por padrão
             // Define valores padrão se não foram fornecidos
             action ??= "Status Alterado";
-            changeDescription ??= $"Novo status: {newStatus}";
+            changeDescription ??= $"Novo status: {TranslateStatus(newStatus.Value)}";
         }
 
         // Valida que há ao menos algo a ser registrado
@@ -170,6 +170,21 @@ public class SuggestionAggregate
             Action = action,
             ChangeDescription = changeDescription
         });
+    }
+
+    public string TranslateStatus(SuggestionStatus status)
+    {
+        var statusLabelMap = new Dictionary<SuggestionStatus, string>
+        {
+                    { SuggestionStatus.Pending, "Pendente" },
+                    { SuggestionStatus.InReview, "Em Análise" },
+                    { SuggestionStatus.Approved, "Aprovada" },
+                    { SuggestionStatus.InProgress, "Em Progresso" },
+                    { SuggestionStatus.Implemented, "Implementada" },
+                    { SuggestionStatus.Rejected, "Rejeitada" },
+        };
+
+        return statusLabelMap.TryGetValue(status, out var label) ? label : status.ToString();
     }
 
 }
