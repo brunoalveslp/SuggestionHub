@@ -221,7 +221,7 @@ const orderOptions = [
 const suggestions = ref<SuggestionDTO[]>([])
 const categories = ref<CategoryDTO[]>([])
 const offset = ref(0)
-const pageSize = 5
+const pageSize = 15
 const finished = ref(false)
 const loading = ref(false)
 const loadMoreTrigger = ref<HTMLElement | null>(null)
@@ -245,10 +245,19 @@ const dialogActionSubscribe = ref(false)
 async function loadSuggestions(reset = false) {
   if (reset) {
     offset.value = 0
-    suggestions.value = []
     finished.value = false
+    suggestions.value = []
+    console.log('resetado')
+
+    // Força o observer a re-observar o gatilho de scroll
+    if (observer && loadMoreTrigger.value) {
+      observer.disconnect()
+      observer.observe(loadMoreTrigger.value)
+    }
   }
+
   if (finished.value || loading.value) return
+
   loading.value = true
 
   const statusString =
@@ -269,11 +278,10 @@ async function loadSuggestions(reset = false) {
 
   try {
     const res = await fetchSuggestions(filter, currentUserId)
-
+    console.log('filtros',filter)
     suggestions.value.push(...res.items)
     offset.value += res.items.length
     finished.value = !res.hasMore
-    console.log("carregando mais!")
   } catch (error) {
     console.error('Erro ao carregar sugestões:', error)
   } finally {
@@ -281,9 +289,14 @@ async function loadSuggestions(reset = false) {
   }
 }
 
+
 function applyFilters() {
   loadSuggestions(true)
 }
+
+watch([searchTerm, selectedCategory, selectedStatus], () => {
+  applyFilters()
+})
 
 function sanitizeDescription(html: string) {
   return DOMPurify.sanitize(html, { FORBID_ATTR: ['style'] })
@@ -373,14 +386,30 @@ onMounted(async () => {
   await loadSuggestions()
 
   observer = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) loadSuggestions()
+    if (entries[0].isIntersecting) {
+      loadSuggestions()
+    }
   })
 
-  if (loadMoreTrigger.value) observer.observe(loadMoreTrigger.value)
+  if (loadMoreTrigger.value) {
+    observer.observe(loadMoreTrigger.value)
+  }
 })
 
-watch(loadMoreTrigger, el => {
-  if (observer && el) observer.observe(el)
+// Re-observar se loadMoreTrigger mudar (evita múltiplos observers)
+watch(loadMoreTrigger, (el) => {
+  if (observer && el) {
+    observer.disconnect()
+    observer.observe(el)
+  }
+})
+
+
+watch(loadMoreTrigger, (el) => {
+  if (observer && el) {
+    observer.disconnect()
+    observer.observe(el)
+  }
 })
 
 async function loadCategories() {

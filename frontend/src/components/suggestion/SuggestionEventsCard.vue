@@ -31,6 +31,15 @@
 import { useAuthStore } from '@/stores/auth'
 import type { SuggestionEventDTO } from '@/types/suggestion/suggestionEventDTO'
 
+const statusLabelMap: Record<string, string> = {
+  'Pending': 'Pendente',
+  'InReview': 'Em Análise',
+  'Approved': 'Aprovada',
+  'InProgress': 'Em Progresso',
+  'Implemented': 'Implementada',
+  'Rejected': 'Rejeitada',
+}
+
 const props = defineProps<{ events: SuggestionEventDTO[] }>()
 
 const authStore = useAuthStore()
